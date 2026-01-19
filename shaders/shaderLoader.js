@@ -1,44 +1,35 @@
 (function () {
   const ShaderLoader = {
-    createShader(gl, type, source) {
-      const shader = gl.createShader(type);
-      gl.shaderSource(shader, source);
-      gl.compileShader(shader);
+    function createShader(gl, type, source) {
+  var shader = gl.createShader(type);
+  gl.shaderSource(shader, source);
+  gl.compileShader(shader);
+  var success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+  if (success) {
+    return shader;
+  }
 
-      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        console.error("Shader compile error:", gl.getShaderInfoLog(shader));
-        gl.deleteShader(shader);
-        return null;
-      }
+  console.log(gl.getShaderInfoLog(shader));  // eslint-disable-line
+  gl.deleteShader(shader);
+  return undefined;
+}
 
-      return shader;
-    },
+    function createProgram(gl, vertexShader, fragmentShader) {
+  var program = gl.createProgram();
+  gl.attachShader(program, vertexShader);
+  gl.attachShader(program, fragmentShader);
+  gl.linkProgram(program);
+  var success = gl.getProgramParameter(program, gl.LINK_STATUS);
+  if (success) {
+    return program;
+  }
 
-    createProgram(gl, vertexSource, fragmentSource) {
-      const vs = ShaderLoader.createShader(gl, gl.VERTEX_SHADER, vertexSource);
-      const fs = ShaderLoader.createShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
+  console.log(gl.getProgramInfoLog(program));  // eslint-disable-line
+  gl.deleteProgram(program);
+  return undefined;
+}
 
-      if (!vs || !fs) return null;
-
-      const program = gl.createProgram();
-      gl.attachShader(program, vs);
-      gl.attachShader(program, fs);
-      gl.linkProgram(program);
-
-      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-        console.error("Program link error:", gl.getProgramInfoLog(program));
-        gl.deleteProgram(program);
-        return null;
-      }
-
-      // Optional: detach and delete shaders after linking to free memory
-      gl.detachShader(program, vs);
-      gl.detachShader(program, fs);
-      gl.deleteShader(vs);
-      gl.deleteShader(fs);
-
-      return program;
-    }
+    
   };
 
   // 👇 expose globally
