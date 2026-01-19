@@ -79,10 +79,21 @@
       gl.deleteProgram(program);
       return null;
     }
+  
 
+    function generate(gl,vertexShaderSource, fragmentShaderSource, opt_errorCallback) {
+       var vertexShader = createShader(gl,vertexShaderSource, gl.VERTEX_SHADER);
+       var fragmentShader = createShader(gl,fragmentShaderSource, gl.FRAGMENT_SHADER);
+       var program = createProgram(gl, vertexShader, fragmentShader);
+
+       return program;
+
+    }
+    
     return {
       createShader,
       createProgram,
+      generate
     };
   }
 );
