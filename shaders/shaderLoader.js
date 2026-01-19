@@ -1,6 +1,6 @@
 (function () {
   const ShaderLoader = {
-    function createShader(gl, type, source) {
+   createShader(gl, type, source) {
   var shader = gl.createShader(type);
   gl.shaderSource(shader, source);
   gl.compileShader(shader);
@@ -14,7 +14,7 @@
   return undefined;
 }
 
-    function createProgram(gl, vertexShader, fragmentShader) {
+   createProgram(gl, vertexShader, fragmentShader) {
   var program = gl.createProgram();
   gl.attachShader(program, vertexShader);
   gl.attachShader(program, fragmentShader);
