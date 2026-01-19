@@ -10,7 +10,7 @@
     module.exports = factory();
   } else {
     // Browser global
-    root.F_2D = factory();
+    root.F_3D = factory();
   }
 }(typeof self !== 'undefined' ? self : this, function () {
 
