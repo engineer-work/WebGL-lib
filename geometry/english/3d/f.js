@@ -405,9 +405,10 @@ var normals = new Float32Array([
           -1, 0, 0,
           -1, 0, 0,
   ]);
-  
+    
   return {
     positions,
+    positions2,
     normals
   };
 }));
