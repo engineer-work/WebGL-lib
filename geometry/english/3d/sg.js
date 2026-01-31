@@ -1,287 +1,185 @@
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
-    // AMD
     define([], factory);
   } else if (typeof module === 'object' && module.exports) {
-    // CommonJS
     module.exports = factory();
   } else {
-    // Browser global
     root.SACRED_GEOMETRY = factory();
   }
 }(typeof self !== 'undefined' ? self : this, function () {
 
-  // Golden ratio constant
   var phi = (1 + Math.sqrt(5)) / 2;
   var invPhi = 1 / phi;
 
-  // AIR - Octahedron (representing intellect, communication)
+  // Helper function to calculate normals
+  function calculateNormals(positions) {
+    var normals = new Float32Array(positions.length);
+    for (var i = 0; i < positions.length; i += 9) {
+      var v0 = {x: positions[i], y: positions[i+1], z: positions[i+2]};
+      var v1 = {x: positions[i+3], y: positions[i+4], z: positions[i+5]};
+      var v2 = {x: positions[i+6], y: positions[i+7], z: positions[i+8]};
+      
+      var edge1 = {x: v1.x - v0.x, y: v1.y - v0.y, z: v1.z - v0.z};
+      var edge2 = {x: v2.x - v0.x, y: v2.y - v0.y, z: v2.z - v0.z};
+      
+      var normal = {
+        x: edge1.y * edge2.z - edge1.z * edge2.y,
+        y: edge1.z * edge2.x - edge1.x * edge2.z,
+        z: edge1.x * edge2.y - edge1.y * edge2.x
+      };
+      
+      var length = Math.sqrt(normal.x * normal.x + normal.y * normal.y + normal.z * normal.z);
+      normal.x /= length;
+      normal.y /= length;
+      normal.z /= length;
+      
+      normals[i] = normal.x; normals[i+1] = normal.y; normals[i+2] = normal.z;
+      normals[i+3] = normal.x; normals[i+4] = normal.y; normals[i+5] = normal.z;
+      normals[i+6] = normal.x; normals[i+7] = normal.y; normals[i+8] = normal.z;
+    }
+    return normals;
+  }
+
+  // AIR - Octahedron (24 vertices)
   var airPositions = new Float32Array([
-    // Top pyramid
-    0, 1, 0,   -1, 0, -1,   1, 0, -1,
-    0, 1, 0,    1, 0, -1,   1, 0, 1,
-    0, 1, 0,    1, 0, 1,   -1, 0, 1,
-    0, 1, 0,   -1, 0, 1,   -1, 0, -1,
+    0, 1, 0, -1, 0, -1, 1, 0, -1,
+    0, 1, 0, 1, 0, -1, 1, 0, 1,
+    0, 1, 0, 1, 0, 1, -1, 0, 1,
+    0, 1, 0, -1, 0, 1, -1, 0, -1,
     
-    // Bottom pyramid
-    0, -1, 0,  -1, 0, -1,   1, 0, -1,
-    0, -1, 0,   1, 0, -1,   1, 0, 1,
-    0, -1, 0,   1, 0, 1,   -1, 0, 1,
-    0, -1, 0,  -1, 0, 1,   -1, 0, -1
+    0, -1, 0, -1, 0, -1, 1, 0, -1,
+    0, -1, 0, 1, 0, -1, 1, 0, 1,
+    0, -1, 0, 1, 0, 1, -1, 0, 1,
+    0, -1, 0, -1, 0, 1, -1, 0, -1
   ]);
+  var airNormals = calculateNormals(airPositions);
+  var airCount = 24; // 8 triangles * 3 vertices
 
-  var airNormals = new Float32Array([
-    // Top pyramid normals
-    0.577, 0.577, -0.577,  0.577, 0.577, -0.577,  0.577, 0.577, -0.577,
-    -0.577, 0.577, -0.577,  -0.577, 0.577, -0.577,  -0.577, 0.577, -0.577,
-    -0.577, 0.577, 0.577,  -0.577, 0.577, 0.577,  -0.577, 0.577, 0.577,
-    0.577, 0.577, 0.577,  0.577, 0.577, 0.577,  0.577, 0.577, 0.577,
-    
-    // Bottom pyramid normals
-    0.577, -0.577, -0.577,  0.577, -0.577, -0.577,  0.577, -0.577, -0.577,
-    -0.577, -0.577, -0.577,  -0.577, -0.577, -0.577,  -0.577, -0.577, -0.577,
-    -0.577, -0.577, 0.577,  -0.577, -0.577, 0.577,  -0.577, -0.577, 0.577,
-    0.577, -0.577, 0.577,  0.577, -0.577, 0.577,  0.577, -0.577, 0.577
-  ]);
-
-  // FIRE - Tetrahedron (representing energy, transformation)
+  // FIRE - Tetrahedron (12 vertices)
   var firePositions = new Float32Array([
-    // Base
-    1, -0.5, -0.5,   -1, -0.5, -0.5,   0, -0.5, 1,
-    
-    // Sides
-    1, -0.5, -0.5,   -1, -0.5, -0.5,   0, 1, 0,
-    -1, -0.5, -0.5,   0, -0.5, 1,       0, 1, 0,
-    0, -0.5, 1,       1, -0.5, -0.5,    0, 1, 0
+    1, -0.5, -0.5, -1, -0.5, -0.5, 0, -0.5, 1,
+    1, -0.5, -0.5, -1, -0.5, -0.5, 0, 1, 0,
+    -1, -0.5, -0.5, 0, -0.5, 1, 0, 1, 0,
+    0, -0.5, 1, 1, -0.5, -0.5, 0, 1, 0
   ]);
+  var fireNormals = calculateNormals(firePositions);
+  var fireCount = 12; // 4 triangles * 3 vertices
 
-  var fireNormals = new Float32Array([
-    // Base normal (down)
-    0, -1, 0,  0, -1, 0,  0, -1, 0,
-    
-    // Side normals
-    0.333, 0.667, -0.667,  0.333, 0.667, -0.667,  0.333, 0.667, -0.667,
-    -0.667, 0.667, 0.333,  -0.667, 0.667, 0.333,  -0.667, 0.667, 0.333,
-    0.333, 0.667, 0.667,  0.333, 0.667, 0.667,  0.333, 0.667, 0.667
-  ]);
-
-  // WATER - Icosahedron (representing flow, emotion)
+  // WATER - Icosahedron (60 vertices)
   var waterPositions = new Float32Array([
-    // 20 triangular faces
-    0, 1, phi,     phi, 0, 1,     1, phi, 0,
-    0, 1, phi,     1, phi, 0,     0, 1, -phi,
-    0, 1, phi,     0, 1, -phi,    -phi, 0, -1,
-    0, 1, phi,     -phi, 0, -1,   -1, phi, 0,
-    0, 1, phi,     -1, phi, 0,    -phi, 0, 1,
-    0, 1, phi,     -phi, 0, 1,    0, -1, phi,
+    0, 1, phi, phi, 0, 1, 1, phi, 0,
+    0, 1, phi, 1, phi, 0, 0, 1, -phi,
+    0, 1, phi, 0, 1, -phi, -phi, 0, -1,
+    0, 1, phi, -phi, 0, -1, -1, phi, 0,
+    0, 1, phi, -1, phi, 0, -phi, 0, 1,
+    0, 1, phi, -phi, 0, 1, 0, -1, phi,
     
-    0, -1, phi,    phi, 0, 1,     0, 1, phi,
-    0, -1, phi,    1, -phi, 0,    phi, 0, 1,
-    0, -1, phi,    -1, -phi, 0,   1, -phi, 0,
-    0, -1, phi,    -phi, 0, 1,    -1, -phi, 0,
-    0, -1, phi,    0, -1, -phi,   -phi, 0, -1,
-    0, -1, phi,    -phi, 0, -1,   -phi, 0, 1,
+    0, -1, phi, phi, 0, 1, 0, 1, phi,
+    0, -1, phi, 1, -phi, 0, phi, 0, 1,
+    0, -1, phi, -1, -phi, 0, 1, -phi, 0,
+    0, -1, phi, -phi, 0, 1, -1, -phi, 0,
+    0, -1, phi, 0, -1, -phi, -phi, 0, -1,
+    0, -1, phi, -phi, 0, -1, -phi, 0, 1,
     
-    phi, 0, 1,     0, -1, phi,     1, -phi, 0,
-    phi, 0, 1,     1, -phi, 0,     1, phi, 0,
-    phi, 0, 1,     1, phi, 0,     0, 1, phi,
+    phi, 0, 1, 0, -1, phi, 1, -phi, 0,
+    phi, 0, 1, 1, -phi, 0, 1, phi, 0,
+    phi, 0, 1, 1, phi, 0, 0, 1, phi,
     
-    1, phi, 0,     phi, 0, -1,     0, 1, -phi,
-    1, phi, 0,     1, -phi, 0,     phi, 0, -1,
+    1, phi, 0, phi, 0, -1, 0, 1, -phi,
+    1, phi, 0, 1, -phi, 0, phi, 0, -1,
     
-    0, 1, -phi,    phi, 0, -1,     0, -1, -phi,
-    0, 1, -phi,    0, -1, -phi,    -phi, 0, -1,
+    0, 1, -phi, phi, 0, -1, 0, -1, -phi,
+    0, 1, -phi, 0, -1, -phi, -phi, 0, -1,
     
-    -phi, 0, -1,   0, -1, -phi,    -1, -phi, 0,
-    -phi, 0, -1,   -1, -phi, 0,    -1, phi, 0,
-    -phi, 0, -1,   -1, phi, 0,     0, 1, -phi,
+    -phi, 0, -1, 0, -1, -phi, -1, -phi, 0,
+    -phi, 0, -1, -1, -phi, 0, -1, phi, 0,
+    -phi, 0, -1, -1, phi, 0, 0, 1, -phi,
     
-    -1, phi, 0,    -phi, 0, 1,     0, 1, phi,
-    -1, phi, 0,    -1, -phi, 0,    -phi, 0, 1
+    -1, phi, 0, -phi, 0, 1, 0, 1, phi,
+    -1, phi, 0, -1, -phi, 0, -phi, 0, 1
   ]);
+  var waterNormals = calculateNormals(waterPositions);
+  var waterCount = 60; // 20 triangles * 3 vertices
 
-  var waterNormals = (function() {
-    // Generate normals for water (icosahedron)
-    var normals = new Float32Array(waterPositions.length);
-    for (var i = 0; i < waterPositions.length; i += 9) {
-      var v0 = {x: waterPositions[i], y: waterPositions[i+1], z: waterPositions[i+2]};
-      var v1 = {x: waterPositions[i+3], y: waterPositions[i+4], z: waterPositions[i+5]};
-      var v2 = {x: waterPositions[i+6], y: waterPositions[i+7], z: waterPositions[i+8]};
-      
-      // Calculate edges
-      var edge1 = {x: v1.x - v0.x, y: v1.y - v0.y, z: v1.z - v0.z};
-      var edge2 = {x: v2.x - v0.x, y: v2.y - v0.y, z: v2.z - v0.z};
-      
-      // Calculate normal
-      var normal = {
-        x: edge1.y * edge2.z - edge1.z * edge2.y,
-        y: edge1.z * edge2.x - edge1.x * edge2.z,
-        z: edge1.x * edge2.y - edge1.y * edge2.x
-      };
-      
-      // Normalize
-      var length = Math.sqrt(normal.x * normal.x + normal.y * normal.y + normal.z * normal.z);
-      normal.x /= length;
-      normal.y /= length;
-      normal.z /= length;
-      
-      // Assign to all 3 vertices of the triangle
-      normals[i] = normal.x; normals[i+1] = normal.y; normals[i+2] = normal.z;
-      normals[i+3] = normal.x; normals[i+4] = normal.y; normals[i+5] = normal.z;
-      normals[i+6] = normal.x; normals[i+7] = normal.y; normals[i+8] = normal.z;
-    }
-    return normals;
-  })();
-
-  // EARTH - Cube (representing stability, foundation)
+  // EARTH - Cube (36 vertices)
   var earthPositions = new Float32Array([
-    // Front face
-    -1, -1, 1,   1, -1, 1,   -1, 1, 1,
-    -1, 1, 1,    1, -1, 1,   1, 1, 1,
+    -1, -1, 1, 1, -1, 1, -1, 1, 1,
+    -1, 1, 1, 1, -1, 1, 1, 1, 1,
     
-    // Back face
-    -1, -1, -1,  -1, 1, -1,   1, -1, -1,
-    1, -1, -1,   -1, 1, -1,   1, 1, -1,
+    -1, -1, -1, -1, 1, -1, 1, -1, -1,
+    1, -1, -1, -1, 1, -1, 1, 1, -1,
     
-    // Top face
-    -1, 1, -1,   -1, 1, 1,    1, 1, -1,
-    1, 1, -1,    -1, 1, 1,    1, 1, 1,
+    -1, 1, -1, -1, 1, 1, 1, 1, -1,
+    1, 1, -1, -1, 1, 1, 1, 1, 1,
     
-    // Bottom face
-    -1, -1, -1,  1, -1, -1,   -1, -1, 1,
-    -1, -1, 1,   1, -1, -1,   1, -1, 1,
+    -1, -1, -1, 1, -1, -1, -1, -1, 1,
+    -1, -1, 1, 1, -1, -1, 1, -1, 1,
     
-    // Right face
-    1, -1, -1,   1, 1, -1,    1, -1, 1,
-    1, -1, 1,    1, 1, -1,    1, 1, 1,
+    1, -1, -1, 1, 1, -1, 1, -1, 1,
+    1, -1, 1, 1, 1, -1, 1, 1, 1,
     
-    // Left face
-    -1, -1, -1,  -1, -1, 1,   -1, 1, -1,
-    -1, 1, -1,   -1, -1, 1,   -1, 1, 1
+    -1, -1, -1, -1, -1, 1, -1, 1, -1,
+    -1, 1, -1, -1, -1, 1, -1, 1, 1
   ]);
+  var earthNormals = calculateNormals(earthPositions);
+  var earthCount = 36; // 12 triangles * 3 vertices
 
-  var earthNormals = new Float32Array([
-    // Front face normals (z = 1)
-    0, 0, 1, 0, 0, 1, 0, 0, 1,
-    0, 0, 1, 0, 0, 1, 0, 0, 1,
-    
-    // Back face normals (z = -1)
-    0, 0, -1, 0, 0, -1, 0, 0, -1,
-    0, 0, -1, 0, 0, -1, 0, 0, -1,
-    
-    // Top face normals (y = 1)
-    0, 1, 0, 0, 1, 0, 0, 1, 0,
-    0, 1, 0, 0, 1, 0, 0, 1, 0,
-    
-    // Bottom face normals (y = -1)
-    0, -1, 0, 0, -1, 0, 0, -1, 0,
-    0, -1, 0, 0, -1, 0, 0, -1, 0,
-    
-    // Right face normals (x = 1)
-    1, 0, 0, 1, 0, 0, 1, 0, 0,
-    1, 0, 0, 1, 0, 0, 1, 0, 0,
-    
-    // Left face normals (x = -1)
-    -1, 0, 0, -1, 0, 0, -1, 0, 0,
-    -1, 0, 0, -1, 0, 0, -1, 0, 0
-  ]);
-
-  // SPACE/ETHER - Dodecahedron (representing consciousness, the void)
+  // SPACE - Dodecahedron (108 vertices)
   var spacePositions = new Float32Array([
-    // Each pentagon face divided into triangles
-    // Face 1
-    1, 1, 1,    0, phi, invPhi,    -1, 1, 1,
-    1, 1, 1,    -1, 1, 1,          phi, invPhi, 0,
-    1, 1, 1,    phi, invPhi, 0,    invPhi, 0, phi,
+    // Each pentagon divided into 3 triangles
+    1, 1, 1, 0, phi, invPhi, -1, 1, 1,
+    1, 1, 1, -1, 1, 1, phi, invPhi, 0,
+    1, 1, 1, phi, invPhi, 0, invPhi, 0, phi,
     
-    // Face 2
-    1, 1, -1,   0, phi, -invPhi,   -1, 1, -1,
-    1, 1, -1,   -1, 1, -1,         phi, invPhi, 0,
-    1, 1, -1,   phi, invPhi, 0,    invPhi, 0, -phi,
+    1, 1, -1, 0, phi, -invPhi, -1, 1, -1,
+    1, 1, -1, -1, 1, -1, phi, invPhi, 0,
+    1, 1, -1, phi, invPhi, 0, invPhi, 0, -phi,
     
-    // Face 3
-    1, -1, 1,   0, -phi, invPhi,   -1, -1, 1,
-    1, -1, 1,   -1, -1, 1,         phi, -invPhi, 0,
-    1, -1, 1,   phi, -invPhi, 0,   invPhi, 0, phi,
+    1, -1, 1, 0, -phi, invPhi, -1, -1, 1,
+    1, -1, 1, -1, -1, 1, phi, -invPhi, 0,
+    1, -1, 1, phi, -invPhi, 0, invPhi, 0, phi,
     
-    // Face 4
-    1, -1, -1,  0, -phi, -invPhi,  -1, -1, -1,
-    1, -1, -1,  -1, -1, -1,        phi, -invPhi, 0,
-    1, -1, -1,  phi, -invPhi, 0,   invPhi, 0, -phi,
+    1, -1, -1, 0, -phi, -invPhi, -1, -1, -1,
+    1, -1, -1, -1, -1, -1, phi, -invPhi, 0,
+    1, -1, -1, phi, -invPhi, 0, invPhi, 0, -phi,
     
-    // More faces...
-    phi, invPhi, 0,   1, 1, 1,     1, 1, -1,
-    phi, invPhi, 0,   1, 1, -1,    1, -1, -1,
-    phi, invPhi, 0,   1, -1, -1,   1, -1, 1,
-    phi, invPhi, 0,   1, -1, 1,    1, 1, 1,
+    phi, invPhi, 0, 1, 1, 1, 1, 1, -1,
+    phi, invPhi, 0, 1, 1, -1, 1, -1, -1,
+    phi, invPhi, 0, 1, -1, -1, 1, -1, 1,
+    phi, invPhi, 0, 1, -1, 1, 1, 1, 1,
     
-    -phi, invPhi, 0,  -1, 1, 1,    -1, 1, -1,
-    -phi, invPhi, 0,  -1, 1, -1,   -1, -1, -1,
-    -phi, invPhi, 0,  -1, -1, -1,  -1, -1, 1,
-    -phi, invPhi, 0,  -1, -1, 1,   -1, 1, 1
+    -phi, invPhi, 0, -1, 1, 1, -1, 1, -1,
+    -phi, invPhi, 0, -1, 1, -1, -1, -1, -1,
+    -phi, invPhi, 0, -1, -1, -1, -1, -1, 1,
+    -phi, invPhi, 0, -1, -1, 1, -1, 1, 1,
+    
+    // Additional faces to complete 12 pentagons
+    invPhi, 0, phi, 1, 1, 1, -1, 1, 1,
+    invPhi, 0, phi, -1, 1, 1, -1, -1, 1,
+    invPhi, 0, phi, -1, -1, 1, 1, -1, 1,
+    
+    invPhi, 0, -phi, 1, 1, -1, -1, 1, -1,
+    invPhi, 0, -phi, -1, 1, -1, -1, -1, -1,
+    invPhi, 0, -phi, -1, -1, -1, 1, -1, -1
   ]);
-
-  var spaceNormals = (function() {
-    // Generate normals for space (dodecahedron)
-    var normals = new Float32Array(spacePositions.length);
-    for (var i = 0; i < spacePositions.length; i += 9) {
-      var v0 = {x: spacePositions[i], y: spacePositions[i+1], z: spacePositions[i+2]};
-      var v1 = {x: spacePositions[i+3], y: spacePositions[i+4], z: spacePositions[i+5]};
-      var v2 = {x: spacePositions[i+6], y: spacePositions[i+7], z: spacePositions[i+8]};
-      
-      // Calculate edges
-      var edge1 = {x: v1.x - v0.x, y: v1.y - v0.y, z: v1.z - v0.z};
-      var edge2 = {x: v2.x - v0.x, y: v2.y - v0.y, z: v2.z - v0.z};
-      
-      // Calculate normal
-      var normal = {
-        x: edge1.y * edge2.z - edge1.z * edge2.y,
-        y: edge1.z * edge2.x - edge1.x * edge2.z,
-        z: edge1.x * edge2.y - edge1.y * edge2.x
-      };
-      
-      // Normalize
-      var length = Math.sqrt(normal.x * normal.x + normal.y * normal.y + normal.z * normal.z);
-      normal.x /= length;
-      normal.y /= length;
-      normal.z /= length;
-      
-      // Assign to all 3 vertices of the triangle
-      normals[i] = normal.x; normals[i+1] = normal.y; normals[i+2] = normal.z;
-      normals[i+3] = normal.x; normals[i+4] = normal.y; normals[i+5] = normal.z;
-      normals[i+6] = normal.x; normals[i+7] = normal.y; normals[i+8] = normal.z;
-    }
-    return normals;
-  })();
+  var spaceNormals = calculateNormals(spacePositions);
+  var spaceCount = 108; // 36 triangles * 3 vertices
 
   return {
-    // Air (Octahedron)
-    airPositions: airPositions,
-    airNormals: airNormals,
+    // Individual elements with counts
+    air: { positions: airPositions, normals: airNormals, count: airCount },
+    fire: { positions: firePositions, normals: fireNormals, count: fireCount },
+    water: { positions: waterPositions, normals: waterNormals, count: waterCount },
+    earth: { positions: earthPositions, normals: earthNormals, count: earthCount },
+    space: { positions: spacePositions, normals: spaceNormals, count: spaceCount },
     
-    // Fire (Tetrahedron)
-    firePositions: firePositions,
-    fireNormals: fireNormals,
-    
-    // Water (Icosahedron)
-    waterPositions: waterPositions,
-    waterNormals: waterNormals,
-    
-    // Earth (Cube)
-    earthPositions: earthPositions,
-    earthNormals: earthNormals,
-    
-    // Space/Ether (Dodecahedron)
-    spacePositions: spacePositions,
-    spaceNormals: spaceNormals,
-    
-    // Optional: All elements in one object
-    elements: {
-      air: { positions: airPositions, normals: airNormals },
-      fire: { positions: firePositions, normals: fireNormals },
-      water: { positions: waterPositions, normals: waterNormals },
-      earth: { positions: earthPositions, normals: earthNormals },
-      space: { positions: spacePositions, normals: spaceNormals }
+    // All counts in one place
+    counts: {
+      air: airCount,
+      fire: fireCount,
+      water: waterCount,
+      earth: earthCount,
+      space: spaceCount
     }
   };
 }));
